@@ -25,6 +25,7 @@ class MeshController:
             self._receivedMessageMeantForOther(message)
     
     def getSendQue(self):
+        print("hello")
         return self.sendQue
         
 
