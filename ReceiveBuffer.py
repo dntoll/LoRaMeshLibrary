@@ -1,7 +1,7 @@
 
-from meshlibrary.Message import ToShortMessageException
-from meshlibrary.Message import NotAMessageException
-from meshlibrary.Message import Message
+from LoRaMeshLibrary.Message import ToShortMessageException
+from LoRaMeshLibrary.Message import NotAMessageException
+from LoRaMeshLibrary.Message import Message
 
 class ReceiveBuffer:
     BUFFER_SIZE = 256

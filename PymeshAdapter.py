@@ -1,12 +1,12 @@
 import time
 import sys
 import struct
-from meshlibrary.Message import Message
+from LoRaMeshLibrary.Message import Message
 
-from meshlibrary.MeshController import MeshController
-from meshlibrary.ReceiveBuffer import ReceiveBuffer
-from meshlibrary.Route import Route
-from meshlibrary.timers import *
+from LoRaMeshLibrary.MeshController import MeshController
+from LoRaMeshLibrary.ReceiveBuffer import ReceiveBuffer
+from LoRaMeshLibrary.Route import Route
+from LoRaMeshLibrary.timers import *
 
 class PymeshAdapter:
     

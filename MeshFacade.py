@@ -1,6 +1,6 @@
-from meshlibrary.ThreadSafeLoraSocket import ThreadSafeLoraSocket
-from meshlibrary.PycomInterface import PycomInterface
-from meshlibrary.PymeshAdapter import PymeshAdapter
+from LoRaMeshLibrary.ThreadSafeLoraSocket import ThreadSafeLoraSocket
+from LoRaMeshLibrary.PycomInterface import PycomInterface
+from LoRaMeshLibrary.PymeshAdapter import PymeshAdapter
 
 class MeshFacade:
     def __init__(self, view, callback):

@@ -1,5 +1,5 @@
-from meshlibrary.Route import Route
-from meshlibrary.MessageChecksum import MessageChecksum
+from LoRaMeshLibrary.Route import Route
+from LoRaMeshLibrary.MessageChecksum import MessageChecksum
 
 class ToShortMessageException(Exception):
     def __init__(self, text):

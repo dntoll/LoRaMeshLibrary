@@ -2,8 +2,8 @@
 
 
 
-from meshlibrary.Route import Route
-from meshlibrary.Neighbor import Neighbor
+from LoRaMeshLibrary.Route import Route
+from LoRaMeshLibrary.Neighbor import Neighbor
 
 
 

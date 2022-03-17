@@ -1,7 +1,7 @@
 
-from meshlibrary.MessageChecksum import MessageChecksum
-from meshlibrary.QueItem import QueItem
-from meshlibrary.timers import *
+from LoRaMeshLibrary.MessageChecksum import MessageChecksum
+from LoRaMeshLibrary.QueItem import QueItem
+from LoRaMeshLibrary.timers import *
 
 
 class SendQue:

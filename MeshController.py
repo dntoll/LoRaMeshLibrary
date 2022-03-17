@@ -1,8 +1,8 @@
-from meshlibrary.Message import Message
-from meshlibrary.Router import Router
-from meshlibrary.Route import Route
-from meshlibrary.SendQue import SendQue
-from meshlibrary.MessageChecksum import MessageChecksum
+from LoRaMeshLibrary.Message import Message
+from LoRaMeshLibrary.Router import Router
+from LoRaMeshLibrary.Route import Route
+from LoRaMeshLibrary.SendQue import SendQue
+from LoRaMeshLibrary.MessageChecksum import MessageChecksum
 
 #this class implements the mesh network protocol
 class MeshController:
