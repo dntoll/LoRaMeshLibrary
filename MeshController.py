@@ -69,6 +69,10 @@ class MeshController:
                 self.view.receiveAccToOther(message)
                 relayedAccMessage = Message(self.myMac, message.getRoute(), Message.TYPE_ACC, bytes(message.contentBytes))
                 self.addToQue(relayedAccMessage)
+        
+        if message.isPing():
+            relayedAccMessage = Message(self.myMac, message.getRoute(), Message.TYPE_ACC, bytes(message.contentBytes))
+            self.addToQue(relayedAccMessage)
 
     def getKnownNeighbors(self):
         return self.neighbors

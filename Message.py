@@ -15,6 +15,7 @@ class Message:
     TYPE_MESSAGE = 0
     TYPE_ACC = 1
     TYPE_FIND = 2
+    TYPE_PING = 3
     
     HEADER_BEGIN_CHAR = ord('#')
     HEADER_END_CHAR = ord('>')
@@ -48,6 +49,9 @@ class Message:
     
     def isFind(self):
         return self.messageType == Message.TYPE_FIND
+    
+    def isPing(self):
+        return self.messageType == Message.TYPE_PING
 
     def transformIntoFindDueToSecondSend(self):
         if self.messageType == Message.TYPE_MESSAGE:

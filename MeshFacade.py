@@ -23,3 +23,6 @@ class MeshFacade:
     
     def getRoutes(self):
         return self.pma.getRoutes()
+
+    def pingNeighbors(self):
+        return self.pma.pingNeighbors()

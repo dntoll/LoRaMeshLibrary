@@ -46,6 +46,12 @@ class PymeshAdapter:
         self.meshControllerLock.release()
         return m
 
+    def pingNeighbors(self):
+        self.meshControllerLock.acquire(1)
+        m = Message(self.getMyAddress(), Route([self.getMyAddress(), self.getMyAddress()]), Message.TYPE_PING, b"")
+        self.meshController.addToQue(m)
+        self.meshControllerLock.release()
+
 
     def _sendThread(this, lora_sock, pycomInterface):
         while (True):
