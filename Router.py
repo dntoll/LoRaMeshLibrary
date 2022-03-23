@@ -19,20 +19,21 @@ class Router:
 
         #receivedLoraStats from lora.stats() https://docs.pycom.io/firmwareapi/pycom/network/lora/
         
-        if self.macIsNeighbour(message.senderMac): #update knowledge
+        if self.macIsNeighbour(message.senderMac): 
+            #update knowledge
             self.neighbors[message.senderMac].rssi = receivedLoraStats.rssi
             self.neighbors[message.senderMac].time = self.pycomInterface.ticks_ms()
         else:
+            #New neighbor
             self.neighbors[message.senderMac] = Neighbor(message.senderMac, receivedLoraStats.rssi, self.pycomInterface.ticks_ms())
         
+        #every node up until sender (and our selves should be included)
         verifiedRoute = message.route.getUpUntil(message.senderMac) #kan vi veta att sändaren finns med?
-
-        
+     
         self.neighbors[message.senderMac].addNodesBeyond(verifiedRoute)
         
-        #Vi kan bara ha koll på den delen som går fram till oss eller sändaren, dvs verifierade router
+        
         if message.route.notInRoute(self.myMac):
-            
             verifiedRoute.addToEnd(self.myMac) #eftersom vi tagit emot detta så kan vi lägga till oss på slutet.
             self.routes[str(verifiedRoute.getBytes())] = verifiedRoute
         else:

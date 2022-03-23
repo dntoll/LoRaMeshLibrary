@@ -49,6 +49,7 @@ class MeshController:
     def _receivedMessageMeantForOther(self, message):    
 
         route = message.getRoute()
+        #route = route.getShortenedRoute(message.senderMac, self.myMac)
 
         messageFinalTarget = route.getTarget()
         
