@@ -97,13 +97,9 @@ class PymeshAdapter:
 
     def sendMessage(self, target_ip, message):
         self.meshControllerLock.acquire(1)
-
-        if self.meshController.router.hasRoute(self.getMyAddress(), target_ip):
-            route = self.meshController.router.getRoute(self.getMyAddress(), target_ip)
-            m = Message(self.getMyAddress(), route, Message.TYPE_MESSAGE, message)
-        else:
-            route = Route(bytes([self.getMyAddress(), target_ip]))
-            m = Message(self.getMyAddress(), route, Message.TYPE_FIND, message)
+        
+        route = Route(bytes([self.getMyAddress(), target_ip]))
+        m = Message(self.getMyAddress(), route, Message.TYPE_FIND, message)
         self.meshController.addToQue(m)
 
         self.meshControllerLock.release()

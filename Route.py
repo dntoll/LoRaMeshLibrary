@@ -98,4 +98,9 @@ class Route:
         
         return Route(bytes(ret))
 
+    def __repr__(self):
+        routeStr = ""
+        for b in self.route:
+            routeStr += "[" + str(b) + "]"
+        return routeStr
     

@@ -11,7 +11,7 @@ class Router:
 
     def __init__(self, pycomInterface, myMac):
         self.neighbors = {}
-        self.routes = {}
+        #self.routes = {}
         self.myMac = myMac
         self.pycomInterface = pycomInterface
 
@@ -29,71 +29,47 @@ class Router:
         
         #every node up until sender (and our selves should be included)
         verifiedRoute = message.route.getUpUntil(message.senderMac) #kan vi veta att sändaren finns med?
-     
         self.neighbors[message.senderMac].addNodesBeyond(verifiedRoute)
-        
-        
-        if message.route.notInRoute(self.myMac):
-            verifiedRoute.addToEnd(self.myMac) #eftersom vi tagit emot detta så kan vi lägga till oss på slutet.
-            self.routes[str(verifiedRoute.getBytes())] = verifiedRoute
-        else:
-            verifiedRoute = message.route.getUpUntil(self.myMac)
-            self.routes[str(verifiedRoute.getBytes())] = verifiedRoute
 
-        #this might not be valid since some might send more strongly than others
-        #backRoute = message.route.getBackRoute()
-        #self.routes[str(backRoute.getBytes())] =backRoute
-        
-    
-    def getRoutes(self):
-        return self.routes
 
-    def getKnownNodes(self):
-        ret = {}
-        for n in self.neighbors:
-            ret[self.neighbors[n].mac] = self.neighbors[n].mac
-
-        for route in self.routes:
-            parts = self.routes[route].getBytes()
-            for n in parts:
-                ret[n] = n
-
-        return ret
 
     def getNeighbors(self):
         return self.neighbors
 
-    def getRoute(self, fromMac, toMac):
-        if self.macIsNeighbour(toMac):
-            route = bytearray(2)
-            route[0] = fromMac
-            route[1] = toMac
-            return Route(bytes(route))
-        
-        for route in self.routes:
-            if self.routes[route].bothInRouteAndOrdered(fromMac, toMac):
-                return self.routes[route].getSubRoute(fromMac, toMac)
-        
-        raise Exception("No route found")
-        
+    def shouldIReRoute(self, route, senderMac):
+        #This message already passed through me
+        if not route.notInRoute(self.myMac):
+            return False
 
-    def hasRoute(self, fromMac, toMac):
-        if self.macIsNeighbour(toMac):
+        r = route
+        T = r.getTarget()
+        S = senderMac
+        if T in self.neighbors and T != S:
             return True
-        
-        if self.iHaveSeenRoute(fromMac, toMac):
-            return True
-        
-        return False
+
+        if self.neighbors[S].hasTarget(T):
+            jumpsBehindSenderToTarget = self.neighbors[S].getJumpsToTarget(T)
+
+            fewestJumpsBehindOtherNeighborToTarget = jumpsBehindSenderToTarget+1 #larger than that
+            bestNeighbor  = -1
+            for n in self.neighbors:
+                N = self.neighbors[n]
+                if N.hasTarget(T) and n != S:
+                    njtt = N.getJumpsToTarget(T)
+                    if njtt < fewestJumpsBehindOtherNeighborToTarget:
+                        fewestJumpsBehindOtherNeighborToTarget = njtt
+                        bestNeighbor = N
+
+            shouldRoute = fewestJumpsBehindOtherNeighborToTarget <= jumpsBehindSenderToTarget
+            
+            print(self.myMac, S, " JumpsBehindSender: ", jumpsBehindSenderToTarget, self.neighbors[S], bestNeighbor, ", JumpsbehindNeigh: ", fewestJumpsBehindOtherNeighborToTarget, shouldRoute, flush=True)
+            return shouldRoute
+        return True
+
+    
     
     def macIsNeighbour(self, mac):
         if mac in self.neighbors:
             return True
         return False
     
-    def iHaveSeenRoute(self, fromMac, toMac):
-        for route in self.routes:
-            if self.routes[route].bothInRouteAndOrdered(fromMac, toMac):
-                return True
-        
-        return False

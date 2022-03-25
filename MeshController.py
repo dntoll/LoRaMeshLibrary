@@ -28,53 +28,41 @@ class MeshController:
         return self.sendQue
 
     def _reachedFinalTarget(self, message):
-        if not message.isAcc() or message.isFind():
-
+        if message.isAcc():
+            self.view.receiveAccToMe(message)
+            #We acc the acc to make sure other search paths are filled
+            if self.sendQue.tryToAccMessagesInQue(message):
+                relayedAccMessage = Message(self.myMac, message.getRoute(), Message.TYPE_ACC, bytes(message.contentBytes))
+                self.addToQue(relayedAccMessage) 
+            #else:
+            #    print("We should not be target of acc unless we have a message")
+        else:
+            #ACC Message
             self.callback(message.getRoute().getOrigin(), message.contentBytes)
             self.view.receiveMessageToMe(message)    
 
-            route = message.getRoute()
-            newRoute = route.getShortenedRoute(message.senderMac, self.myMac)
-
-            accRoute = newRoute.getBackRoute()
+            accRoute = Route(bytes([self.myMac, message.getRoute().getOrigin()]))
             checksum = MessageChecksum.fromMessage(message)
 
             self.addToQue(Message(self.myMac, accRoute, Message.TYPE_ACC, checksum.toBytes()))
-        elif message.isAcc():
-            if self.sendQue.tryToAccMessagesInQue(message):
-                self.view.receiveAccToMe(message)
-                relayedAccMessage = Message(self.myMac, message.getRoute(), Message.TYPE_ACC, bytes(message.contentBytes))
-                self.addToQue(relayedAccMessage)
 
     def _receivedMessageMeantForOther(self, message):    
 
         route = message.getRoute()
-        #route = route.getShortenedRoute(message.senderMac, self.myMac)
-
         messageFinalTarget = route.getTarget()
-        
-        if route.bothInRouteAndOrdered(message.senderMac, self.myMac):
-            self._reroute(route, message)
-        elif message.isFind() and route.notInRoute(self.myMac):
-            self.view.receivedFindMessage(message)
-
-            if self.router.hasRoute(self.myMac, messageFinalTarget):
-                self._suggestRoute(route, message)
-            else:
-                self._passOnFindMessage(route, message)
-        else:
-            self.view.receivedNoRouteMessage(message)
 
         if message.isAcc():
+            self.view.receiveAccToOther(message)
             if self.sendQue.tryToAccMessagesInQue(message):
-                self.view.receiveAccToOther(message)
-                relayedAccMessage = Message(self.myMac, message.getRoute(), Message.TYPE_ACC, bytes(message.contentBytes))
+                messageFinalTarget = route.getTarget()
+                fromMeToTarget = Route(bytes([self.myMac, messageFinalTarget]))
+                newRoute = route.expandTail(fromMeToTarget)
+                relayedAccMessage = Message(self.myMac, newRoute, Message.TYPE_ACC, bytes(message.contentBytes))
                 self.addToQue(relayedAccMessage)
-        
-        if message.isPing():
-            checksum = MessageChecksum.fromMessage(message)
-            relayedAccMessage = Message(self.myMac, message.getRoute(), Message.TYPE_ACC, checksum.toBytes())
-            self.addToQue(relayedAccMessage)
+        else:
+            self.view.receivedRouteMessage(message)
+            if self.router.shouldIReRoute(message.getRoute(), message.senderMac):
+                self._reroute(route, message)
 
     def getKnownNeighbors(self):
         return self.neighbors
@@ -82,24 +70,13 @@ class MeshController:
     def addToQue(self, message):
         self.sendQue.addToQue(message)
 
-    def _suggestRoute(self, route, message):
-        messageFinalTarget = route.getTarget()
-        fromMeToTarget = self.router.getRoute(self.myMac, messageFinalTarget)
-        newRoute = route.expandTail(fromMeToTarget) #prevRoute, prevTarget => prevRoute + fromMetoTarget
-        relayedMessage = Message(self.myMac, newRoute, Message.TYPE_MESSAGE, bytes(message.contentBytes))
-        self.view.suggestRoute(relayedMessage)
-        self.addToQue(relayedMessage)
-    
-    def _passOnFindMessage(self, route, message):
+   
+    def _reroute(self, route, message):
+        #add yourself
         messageFinalTarget = route.getTarget()
         fromMeToTarget = Route(bytes([self.myMac, messageFinalTarget]))
         newRoute = route.expandTail(fromMeToTarget)
-        searchMessage = Message(self.myMac, newRoute, Message.TYPE_FIND, bytes(message.contentBytes))
+
+        searchMessage = Message(self.myMac, newRoute, message.messageType, bytes(message.contentBytes))
         self.view.passOnFindMessage(searchMessage)
         self.addToQue(searchMessage)
-
-    def _reroute(self, route, message):
-        newRoute = route.getShortenedRoute(message.senderMac, self.myMac)
-        relayedMessage = Message(self.myMac, newRoute, message.messageType, bytes(message.contentBytes))
-        self.view.receivedRouteMessage(relayedMessage)
-        self.addToQue(relayedMessage)
